@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from os import getenv
 import psycopg2
@@ -5,11 +6,13 @@ import psycopg2
 
 app = FastAPI()
 
+
+load_dotenv()
 connection = psycopg2.connect(
-    host=getenv('DB_HOST'),
-    database=getenv('DB_NAME'),
-    user=getenv('DB_USER'),
-    password=getenv('DB_PASSWORD'),
+    host=getenv("DB_HOST"),
+    database=getenv("DB_NAME"),
+    user=getenv("DB_USER"),
+    password=getenv("DB_PASSWORD"),
 )
 
 
