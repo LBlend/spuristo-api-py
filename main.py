@@ -1,7 +1,9 @@
+from datetime import datetime
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from os import getenv
 import psycopg2
+from pydantic import BaseModel
 
 
 app = FastAPI()
@@ -36,18 +38,31 @@ connection.commit()
 cursor.close()
 
 
+class DeviceLogPoint(BaseModel):
+    time: datetime
+    devices: int
+    prediction_people: int | None
+    actual_people: int | None
+
+
 @app.get("/")
 async def root():
     return "Pog yeet yeet"
 
 
 @app.post("/insert")
-async def insert_datapoint(data: dict):
+async def insert_datapoint(datapoint: DeviceLogPoint):
+    datapoint_tuple = tuple(i[1] for i in tuple(datapoint))  # Fetch only the values from request body
+
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO training_data time, devices, prediction_people, actual_people VALUES (%s)", (data,))
+    cursor.execute(
+        "INSERT INTO device_log (time, devices, prediction_people, actual_people) VALUES (%s, %s, %s, %s)",
+        datapoint_tuple,
+    )
     connection.commit()
     cursor.close()
-    return {"success": True}
+
+    return {"success": True, "data": datapoint.dict()}
 
 
 @app.post("/insert_real")
