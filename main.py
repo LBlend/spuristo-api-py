@@ -87,10 +87,11 @@ async def get_latest_datapoint():
 @app.get("/training")
 async def get_training_datapoints():
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM device_log WHERE actual_people != null")
+    cursor.execute("SELECT * FROM device_log WHERE actual_people IS NOT NULL")
     data = cursor.fetchall()
     cursor.close()
-    return data
+
+    return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
 
 
 @app.get("/all")
