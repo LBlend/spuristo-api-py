@@ -16,6 +16,26 @@ connection = psycopg2.connect(
 )
 
 
+# Create database tables
+create_query = """
+CREATE TABLE IF NOT EXISTS public.device_log
+(
+    "time" timestamp with time zone NOT NULL,
+    devices smallint NOT NULL,
+    prediction_people smallint,
+    actual_people smallint,
+    PRIMARY KEY ("time")
+);
+
+ALTER TABLE public.device_log
+    OWNER to %s;
+"""
+cursor = connection.cursor()
+cursor.execute(create_query % getenv("DB_USER"))
+connection.commit()
+cursor.close()
+
+
 @app.get("/")
 async def root():
     return "Pog yeet yeet"
