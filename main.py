@@ -66,9 +66,9 @@ async def insert_datapoint(datapoint: DeviceLogPoint):
 
 
 @app.post("/insert_real")
-async def insert_real_people(data: dict):
+async def insert_real_people(actual_people: int):
     cursor = connection.cursor()
-    cursor.execute("UPDATE TABLE device_log SET actual_people VALUES (%s)", (data,))
+    cursor.execute("UPDATE TABLE device_log SET actual_people VALUES (%s) WHERE time = %s", (actual_people,))
     connection.commit()
     cursor.close()
     return {"success": True}
@@ -100,4 +100,5 @@ async def get_all_datapoints():
     cursor.execute("SELECT * FROM device_log")
     data = cursor.fetchall()
     cursor.close()
-    return data
+
+    return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
