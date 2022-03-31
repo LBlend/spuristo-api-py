@@ -43,10 +43,10 @@ async def root():
 
 @app.post("/insert")
 async def insert_datapoint(data: dict):
-    cur = connection.cursor()
-    cur.execute("INSERT INTO training_data time, devices, prediction_people, actual_people VALUES (%s)", (data,))
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO training_data time, devices, prediction_people, actual_people VALUES (%s)", (data,))
     connection.commit()
-    cur.close()
+    cursor.close()
     return {"success": True}
 
 
