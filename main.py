@@ -50,6 +50,15 @@ async def insert_datapoint(data: dict):
     return {"success": True}
 
 
+@app.post("/insert_real")
+async def insert_real_people(data: dict):
+    cursor = connection.cursor()
+    cursor.execute("UPDATE TABLE device_log SET actual_people VALUES (%s)", (data,))
+    connection.commit()
+    cursor.close()
+    return {"success": True}
+
+
 @app.get("/latest")
 async def get_latest_datapoint():
     cursor = connection.cursor()
