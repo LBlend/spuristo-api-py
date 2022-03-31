@@ -80,7 +80,8 @@ async def get_latest_datapoint():
     cursor.execute("SELECT * FROM device_log ORDER BY time DESC LIMIT 1")
     data = cursor.fetchone()
     cursor.close()
-    return data[0]
+
+    return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
 
 
 @app.get("/training")
