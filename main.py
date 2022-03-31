@@ -6,7 +6,7 @@ import psycopg2
 
 app = FastAPI()
 
-
+# Load environment variables and connect to database
 load_dotenv()
 connection = psycopg2.connect(
     host=getenv("DB_HOST"),
