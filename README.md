@@ -6,9 +6,8 @@ The API is written in Python but I'm planning on rewriting this in Rust at some 
 
 ## Prerequisites
 
-* Python 3.10+
-* A Postgresql database
-
+- Python 3.10+
+- A Postgresql database
 
 ## Get started
 
@@ -20,4 +19,6 @@ python -m pip install -r requirements.txt
 
 2. Run the API
 
-*TODO*
+```
+uvicorn main:app --reload
+```
