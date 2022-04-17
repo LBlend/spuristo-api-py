@@ -105,7 +105,7 @@ async def insert_real_people(actual_people: int):
     if actual_people < 0:
         raise HTTPException(status_code=400, detail="Actual people count cannot be negative")
 
-    time = round_time(datetime.now())
+    time = round_time(datetime.utcnow())
 
     cursor = connection.cursor()
     try:
