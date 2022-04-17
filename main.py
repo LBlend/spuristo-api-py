@@ -61,6 +61,27 @@ async def root() -> str:
 @app.post("/insert", status_code=201, response_model=DeviceLogPoint)
 async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     """Insert a new datapoint into the database. Time will be rounded down to the nearest 5th minute"""
+
+    datapoint.time = round_time(datapoint.time)
+    datapoint_tuple = tuple(i[1] for i in tuple(datapoint))  # Fetch only the values from request body
+
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO device_log (time, devices, prediction_people, actual_people) VALUES (%s, %s, %s, %s)",
+            datapoint_tuple,
+        )
+    except psycopg2.errors.UniqueViolation:
+        connection.rollback()
+        raise HTTPException(status_code=409, detail="Entry at this timestamp, when rounded down, already exists")
+    else:
+        connection.commit()
+    finally:
+        cursor.close()
+
+    return datapoint.dict()
+
+
     datapoint_tuple = tuple(i[1] for i in tuple(datapoint))  # Fetch only the values from request body
 
     cursor = connection.cursor()
