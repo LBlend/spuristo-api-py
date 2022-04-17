@@ -38,6 +38,12 @@ connection.commit()
 cursor.close()
 
 
+def round_time(time: datetime) -> datetime:
+    """Round down to nearest 5th minute"""
+    new_minute = time.minute - (time.minute % 5)
+    return time.replace(minute=new_minute, second=0, microsecond=0)
+
+
 class DeviceLogPoint(BaseModel):
     time: datetime
     devices: int
