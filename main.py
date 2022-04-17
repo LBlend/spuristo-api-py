@@ -109,7 +109,7 @@ async def insert_real_people(actual_people: int):
 
     cursor = connection.cursor()
     try:
-        cursor.execute("UPDATE device_log SET actual_people = (%s) WHERE time = %s", (actual_people, time))
+        cursor.execute("UPDATE device_log SET actual_people = %s WHERE time = %s", (actual_people, time))
     except psycopg2.errors.NumericValueOutOfRange:
         connection.rollback()
         raise HTTPException(status_code=400, detail="Actual people count cannot exceed 32767 people")
