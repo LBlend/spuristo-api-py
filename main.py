@@ -160,3 +160,16 @@ async def get_all_datapoints() -> list[DeviceLogPoint]:
     cursor.close()
 
     return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
+
+
+@app.delete("/delete", status_code=204)
+async def delete_datapoint(unix_timestamp: datetime):
+    """Delete a specified datapoint from the database"""
+
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM device_log WHERE time = %s", (unix_timestamp,))
+    delete_successful = True if cursor.rowcount > 0 else False
+    cursor.close()
+
+    if not delete_successful:
+        raise HTTPException(status_code=404, detail="No entry found at this timestamp")
