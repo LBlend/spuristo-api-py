@@ -22,3 +22,9 @@ python -m pip install -r requirements.txt
 ```
 uvicorn main:app --reload
 ```
+
+The API will now be available at [http://127.0.0.1:5000](http://127.0.0.1:5000), assuming you haven't changed the port.
+
+The docs can be found at [/docs](http://127.0.0.1:5000/docs)
+
+![image illustrating how the docs page looks](https://user-images.githubusercontent.com/24893890/163731675-314d1f34-6161-49ea-9339-1e0380d56954.png)
