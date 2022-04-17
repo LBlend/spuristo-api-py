@@ -22,7 +22,7 @@ connection = psycopg2.connect(
 create_query = """
 CREATE TABLE IF NOT EXISTS public.device_log
 (
-    "time" timestamp with time zone NOT NULL,
+    "time" timestamp NOT NULL,
     devices smallint NOT NULL,
     prediction_people smallint,
     actual_people smallint,
