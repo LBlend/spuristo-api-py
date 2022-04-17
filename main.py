@@ -105,8 +105,8 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     return datapoint.dict()
 
 
-@app.post("/insert-real", status_code=204, response_model=DeviceLogPoint)
-async def insert_real_people(actual_people: int) -> DeviceLogPoint:
+@app.post("/insert-real", status_code=204)
+async def insert_real_people(actual_people: int):
     """Insert actual people count into at the current point of time"""
 
     if actual_people < 0:
@@ -130,8 +130,6 @@ async def insert_real_people(actual_people: int) -> DeviceLogPoint:
         raise HTTPException(status_code=404, detail="No entry found at this timestamp")
 
     cursor.close()
-
-    return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
 
 
 @app.get("/latest", response_model=DeviceLogPoint)
