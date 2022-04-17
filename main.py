@@ -108,9 +108,6 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
 async def insert_real_people(actual_people: int):
     """Insert actual people count into at the current point of time"""
 
-    if actual_people < 0:
-        raise HTTPException(status_code=400, detail="Actual people count cannot be negative")
-
     time = round_time(datetime.utcnow())
 
     cursor = connection.cursor()
