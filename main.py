@@ -67,6 +67,9 @@ async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     except psycopg2.errors.UniqueViolation:
         connection.rollback()
         raise HTTPException(status_code=409, detail="Entry at this timestamp, when rounded down, already exists")
+    except psycopg2.errors.NumericValueOutOfRange:
+        connection.rollback()
+        raise HTTPException(status_code=409, detail="Make sure all numbers of devices and people do not exceed 32767")
     else:
         connection.commit()
     finally:
@@ -90,6 +93,9 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     except psycopg2.errors.UniqueViolation:
         connection.rollback()
         raise HTTPException(status_code=409, detail="Entry at this timestamp already exists")
+    except psycopg2.errors.NumericValueOutOfRange:
+        connection.rollback()
+        raise HTTPException(status_code=409, detail="Make sure all numbers of devices and people do not exceed 32767")
     else:
         connection.commit()
     finally:
