@@ -116,19 +116,17 @@ async def insert_real_people(actual_people: int):
     cursor = connection.cursor()
     try:
         cursor.execute("UPDATE device_log SET actual_people = %s WHERE time = %s", (actual_people, time))
+        update_successful = True if cursor.rowcount > 0 else False
     except psycopg2.errors.NumericValueOutOfRange:
         connection.rollback()
         raise HTTPException(status_code=400, detail="Actual people count cannot exceed 32767 people")
     else:
         connection.commit()
+    finally:
+        cursor.close()
 
-    cursor.execute("SELECT * FROM device_log WHERE time = %s LIMIT 1", (time,))
-    data = cursor.fetchone()
-
-    if data is None:
+    if update_successful:
         raise HTTPException(status_code=404, detail="No entry found at this timestamp")
-
-    cursor.close()
 
 
 @app.get("/latest", response_model=DeviceLogPoint)
