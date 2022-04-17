@@ -51,13 +51,6 @@ class DeviceLogPoint(BaseModel):
     actual_people: int | None
 
 
-@app.get("/", response_model=str)
-async def root() -> str:
-    """Endpoint for testing whether the API is running or not"""
-
-    return "Pog yeet yeet"
-
-
 @app.post("/insert", status_code=201, response_model=DeviceLogPoint)
 async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     """Insert a new datapoint into the database. Time will be rounded down to the nearest 5th minute"""
