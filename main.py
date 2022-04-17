@@ -82,17 +82,29 @@ async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
     return datapoint.dict()
 
 
+@app.post("/insert-raw", status_code=201, response_model=DeviceLogPoint)
+async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
+    """Insert raw datapoint, without any rounding of time"""
+
     datapoint_tuple = tuple(i[1] for i in tuple(datapoint))  # Fetch only the values from request body
 
     cursor = connection.cursor()
-    cursor.execute(
-        "INSERT INTO device_log (time, devices, prediction_people, actual_people) VALUES (%s, %s, %s, %s)",
-        datapoint_tuple,
-    )
-    connection.commit()
-    cursor.close()
+    try:
+        cursor.execute(
+            "INSERT INTO device_log (time, devices, prediction_people, actual_people) VALUES (%s, %s, %s, %s)",
+            datapoint_tuple,
+        )
+    except psycopg2.errors.UniqueViolation:
+        connection.rollback()
+        cursor.close()
+        raise HTTPException(status_code=409, detail="Entry at this timestamp already exists")
+    else:
+        connection.commit()
+    finally:
+        cursor.close()
 
-    return {"success": True, "data": datapoint.dict()}
+    return datapoint.dict()
+
 
 @app.post("/insert-real", status_code=204, response_model=DeviceLogPoint)
 async def insert_real_people(actual_people: int) -> DeviceLogPoint:
