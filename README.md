@@ -17,7 +17,9 @@ The API is written in Python but I'm planning on rewriting this in Rust at some 
 python -m pip install -r requirements.txt
 ```
 
-2. Run the API
+2. Rename the [.env.example](.env.example) file to `.env` and enter your database details
+
+3. Run the API
 
 ```
 uvicorn main:app --reload
