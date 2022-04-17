@@ -122,7 +122,7 @@ async def insert_real_people(actual_people: int):
     finally:
         cursor.close()
 
-    if update_successful:
+    if not update_successful:
         raise HTTPException(status_code=404, detail="No entry found at this timestamp")
 
 
