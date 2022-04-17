@@ -1,6 +1,6 @@
 from datetime import datetime
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from os import getenv
 import psycopg2
 from pydantic import BaseModel
@@ -45,13 +45,16 @@ class DeviceLogPoint(BaseModel):
     actual_people: int | None
 
 
-@app.get("/")
-async def root():
+@app.get("/", response_model=str)
+async def root() -> str:
+    """Endpoint for testing whether the API is running or not"""
+
     return "Pog yeet yeet"
 
 
-@app.post("/insert")
-async def insert_datapoint(datapoint: DeviceLogPoint):
+@app.post("/insert", status_code=201, response_model=DeviceLogPoint)
+async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
+    """Insert a new datapoint into the database. Time will be rounded down to the nearest 5th minute"""
     datapoint_tuple = tuple(i[1] for i in tuple(datapoint))  # Fetch only the values from request body
 
     cursor = connection.cursor()
@@ -64,6 +67,9 @@ async def insert_datapoint(datapoint: DeviceLogPoint):
 
     return {"success": True, "data": datapoint.dict()}
 
+@app.post("/insert-real", status_code=204, response_model=DeviceLogPoint)
+async def insert_real_people(actual_people: int) -> DeviceLogPoint:
+    """Insert actual people count into at the current point of time"""
 
 @app.post("/insert_real")
 async def insert_real_people(actual_people: int):
@@ -73,9 +79,10 @@ async def insert_real_people(actual_people: int):
     cursor.close()
     return {"success": True}
 
+@app.get("/latest", response_model=DeviceLogPoint)
+async def get_latest_datapoint() -> DeviceLogPoint:
+    """Get the latest datapoint from the database"""
 
-@app.get("/latest")
-async def get_latest_datapoint():
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM device_log ORDER BY time DESC LIMIT 1")
     data = cursor.fetchone()
@@ -84,8 +91,10 @@ async def get_latest_datapoint():
     return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
 
 
-@app.get("/training")
-async def get_training_datapoints():
+@app.get("/training", response_model=list[DeviceLogPoint])
+async def get_training_datapoints() -> list[DeviceLogPoint]:
+    """Get all datapoints that contains a human labeled number of actual people"""
+
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM device_log WHERE actual_people IS NOT NULL")
     data = cursor.fetchall()
@@ -94,8 +103,10 @@ async def get_training_datapoints():
     return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
 
 
-@app.get("/all")
-async def get_all_datapoints():
+@app.get("/all", response_model=list[DeviceLogPoint])
+async def get_all_datapoints() -> list[DeviceLogPoint]:
+    """Get all datapoints from the database"""
+
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM device_log")
     data = cursor.fetchall()
