@@ -96,7 +96,6 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
         )
     except psycopg2.errors.UniqueViolation:
         connection.rollback()
-        cursor.close()
         raise HTTPException(status_code=409, detail="Entry at this timestamp already exists")
     else:
         connection.commit()
