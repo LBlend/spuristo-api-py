@@ -1,8 +1,8 @@
 # spuristo API - Python edition
 
-This repo contains the API which provides and interface for [spuristo](https://github.com/LBlend/spuristo) to communicate with its database.
+This repo contains the API which provides an interface for [spuristo](https://github.com/LBlend/spuristo) to communicate with its database.
 
-The API is written in Python but I'm planning on rewriting this in Rust at some point, hence the name.
+The API is written in Python but I'm planning on rewriting this in Rust at some point, hence its name.
 
 ## Prerequisites
 
