@@ -173,3 +173,18 @@ async def delete_datapoint(unix_timestamp: datetime):
 
     if not delete_successful:
         raise HTTPException(status_code=404, detail="No entry found at this timestamp")
+
+
+@app.delete("/delete-current-latest", status_code=204)
+async def delete_current_latest_datapoint():
+    """Delete the latest datapoint, if there is any rounded down to nearest 5th minute, from the database"""
+
+    time = round_time(datetime.utcnow())
+
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM device_log WHERE time = %s", (time,))
+    delete_successful = True if cursor.rowcount > 0 else False
+    cursor.close()
+
+    if not delete_successful:
+        raise HTTPException(status_code=404, detail="No entry found at this timestamp")
