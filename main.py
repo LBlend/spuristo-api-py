@@ -110,13 +110,30 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
 async def insert_real_people(actual_people: int) -> DeviceLogPoint:
     """Insert actual people count into at the current point of time"""
 
-@app.post("/insert_real")
-async def insert_real_people(actual_people: int):
+    if actual_people < 0:
+        raise HTTPException(status_code=400, detail="Actual people count cannot be negative")
+
+    time = round_time(datetime.now())
+
     cursor = connection.cursor()
-    cursor.execute("UPDATE TABLE device_log SET actual_people VALUES (%s) WHERE time = %s", (actual_people,))
-    connection.commit()
+    try:
+        cursor.execute("UPDATE device_log SET actual_people = (%s) WHERE time = %s", (actual_people, time))
+    except psycopg2.errors.NumericValueOutOfRange:
+        connection.rollback()
+        raise HTTPException(status_code=400, detail="Actual people count cannot exceed 32767 people")
+    else:
+        connection.commit()
+
+    cursor.execute("SELECT * FROM device_log WHERE time = %s LIMIT 1", (time,))
+    data = cursor.fetchone()
+
+    if data is None:
+        raise HTTPException(status_code=404, detail="No entry found at this timestamp")
+
     cursor.close()
-    return {"success": True}
+
+    return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
+
 
 @app.get("/latest", response_model=DeviceLogPoint)
 async def get_latest_datapoint() -> DeviceLogPoint:
