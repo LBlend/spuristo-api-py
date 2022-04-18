@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS public.device_log
     devices smallint NOT NULL,
     prediction_people smallint,
     actual_people smallint,
-    PRIMARY KEY ("time")
+    PRIMARY KEY ("time"),
+    CONSTRAINT no_negative_values CHECK (devices >= 0 AND prediction_people >= 0 AND actual_people >= 0)
 );
 
 ALTER TABLE public.device_log
@@ -69,7 +70,10 @@ async def insert_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
         raise HTTPException(status_code=409, detail="Entry at this timestamp, when rounded down, already exists")
     except psycopg2.errors.NumericValueOutOfRange:
         connection.rollback()
-        raise HTTPException(status_code=409, detail="Make sure all numbers of devices and people do not exceed 32767")
+        raise HTTPException(status_code=400, detail="Make sure all numbers of devices and people do not exceed 32767")
+    except psycopg2.errors.CheckViolation:
+        connection.rollback()
+        raise HTTPException(status_code=400, detail="No negative values allowed!")
     else:
         connection.commit()
     finally:
@@ -95,7 +99,10 @@ async def insert_raw_datapoint(datapoint: DeviceLogPoint) -> DeviceLogPoint:
         raise HTTPException(status_code=409, detail="Entry at this timestamp already exists")
     except psycopg2.errors.NumericValueOutOfRange:
         connection.rollback()
-        raise HTTPException(status_code=409, detail="Make sure all numbers of devices and people do not exceed 32767")
+        raise HTTPException(status_code=400, detail="Make sure all numbers of devices and people do not exceed 32767")
+    except psycopg2.errors.CheckViolation:
+        connection.rollback()
+        raise HTTPException(status_code=400, detail="No negative values allowed!")
     else:
         connection.commit()
     finally:
@@ -117,6 +124,9 @@ async def insert_real_people(actual_people: int):
     except psycopg2.errors.NumericValueOutOfRange:
         connection.rollback()
         raise HTTPException(status_code=400, detail="Actual people count cannot exceed 32767 people")
+    except psycopg2.errors.CheckViolation:
+        connection.rollback()
+        raise HTTPException(status_code=400, detail="No negative values allowed!")
     else:
         connection.commit()
     finally:
