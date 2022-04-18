@@ -135,7 +135,9 @@ async def get_latest_datapoint() -> DeviceLogPoint:
     data = cursor.fetchone()
     cursor.close()
 
-    return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
+    if data:
+        return DeviceLogPoint(time=data[0], devices=data[1], prediction_people=data[2], actual_people=data[3])
+    raise HTTPException(status_code=404, detail="No entries in database")
 
 
 @app.get("/training", response_model=list[DeviceLogPoint])
@@ -147,7 +149,9 @@ async def get_training_datapoints() -> list[DeviceLogPoint]:
     data = cursor.fetchall()
     cursor.close()
 
-    return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
+    if data:
+        return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
+    return []
 
 
 @app.get("/all", response_model=list[DeviceLogPoint])
@@ -159,7 +163,9 @@ async def get_all_datapoints() -> list[DeviceLogPoint]:
     data = cursor.fetchall()
     cursor.close()
 
-    return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
+    if data:
+        return [DeviceLogPoint(time=i[0], devices=i[1], prediction_people=i[2], actual_people=i[3]) for i in data]
+    return []
 
 
 @app.delete("/delete", status_code=204)
