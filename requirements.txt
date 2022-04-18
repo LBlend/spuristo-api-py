@@ -1,4 +1,4 @@
-fastapi
-uvicorn[standard]
-psycopg2
-python-dotenv
+fastapi==0.75.2
+psycopg2==2.9.3
+pydantic==1.9.0
+python-dotenv==0.20.0
